@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <title>RateFinder</title>
+  <style>
+    body { font-family: Arial; max-width: 500px; margin: 50px auto; }
+    select, button { padding: 10px; margin: 5px 0; width: 100%; }
+    #result { margin-top: 20px; font-size: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<h1>💰 RateFinder</h1>
+
+<select id="job">
+  <option value="design">Design</option>
+  <option value="software">Software</option>
+  <option value="marketing">Marketing</option>
+</select>
+
+<select id="level">
+  <option value="junior">Junior</option>
+  <option value="mid">Mid</option>
+  <option value="senior">Senior</option>
+</select>
+
+<select id="country">
+  <option value="CL">Chile</option>
+  <option value="US">USA</option>
+</select>
+
+<button onclick="getRate()">Calculate</button>
+
+<div id="result"></div>
+
+<script>
+async function getRate() {
+  const job = document.getElementById("job").value;
+  const level = document.getElementById("level").value;
+  const country = document.getElementById("country").value;
+
+  const res = await fetch(`http://127.0.0.1:8000/rate?job=${job}&level=${level}&country=${country}`);
+  const data = await res.json();
+
+document.getElementById("result").innerText =
+  "💰 You should charge: " + data.range;
+}
+</script>
+
+</body>
+</html>

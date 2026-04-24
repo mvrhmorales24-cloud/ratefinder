@@ -3,47 +3,64 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# 🔥 IMPORTANTE: CORS DEBE IR JUSTO DESPUÉS DE app = FastAPI()
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # para producción luego puedes restringirlo
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# 💼 salarios base reales (USD global estimado)
+BASE_SALARIES = {
+    "dev": 5500,
+    "developer": 5500,
+    "software engineer": 6500,
+    "designer": 3500,
+    "ux": 4200,
+    "vet": 5000,
+    "veterinarian": 5000,
+    "data analyst": 4500,
+    "marketing": 3800
+}
+
+# 📊 niveles reales de mercado
+LEVELS = {
+    "junior": 0.6,
+    "mid": 1.0,
+    "senior": 1.8
+}
+
+# 🌍 monedas reales simplificadas
+CURRENCY = {
+    "US": 1,
+    "CL": 950,
+    "CA": 1.35,
+    "MX": 17,
+    "UK": 0.79,
+    "EU": 0.92
+}
+
 @app.get("/rate")
-def get_rate(job: str = "dev", level: str = "junior", country: str = "CL"):
+def get_rate(job: str = "dev", level: str = "junior", country: str = "US"):
 
     job = job.lower().strip()
     level = level.lower().strip()
+    country = country.upper().strip()
 
-    base_salaries = {
-        "dev": 2500,
-        "developer": 2500,
-        "designer": 1800,
-        "ux": 2000,
-        "vet": 2200,
-        "veterinarian": 2200
-    }
+    base = BASE_SALARIES.get(job, 4500)
+    mult = LEVELS.get(level, 1.0)
+    currency = CURRENCY.get(country, 1)
 
-    level_multipliers = {
-        "junior": 1.0,
-        "mid": 1.5,
-        "senior": 2.2
-    }
-
-    base = base_salaries.get(job, 1500)
-    multiplier = level_multipliers.get(level, 1.0)
-
-    min_salary = int(base * multiplier)
-    max_salary = int(base * multiplier * 1.3)
+    # 💰 USD realista
+    min_usd = base * mult
+    max_usd = base * mult * 1.25
 
     return {
         "job": job,
         "level": level,
-        "country": country.upper(),
-        "min": min_salary,
-        "max": max_salary
+        "country": country,
+        "currency": currency,
+        "min_usd": round(min_usd),
+        "max_usd": round(max_usd)
     }

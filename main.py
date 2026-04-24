@@ -1,13 +1,25 @@
 ﻿from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+# 🔥 CORS FIX (OBLIGATORIO PARA NETLIFY)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # en producción puedes cambiarlo por tu dominio Netlify
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 💰 Endpoint principal
 @app.get("/rate")
 def get_rate(job: str = "dev", level: str = "junior", country: str = "CL"):
 
     job = job.lower().strip()
     level = level.lower().strip()
 
+    # 📊 Base de salarios
     base_salaries = {
         "dev": 2500,
         "developer": 2500,
@@ -17,13 +29,14 @@ def get_rate(job: str = "dev", level: str = "junior", country: str = "CL"):
         "veterinarian": 2200
     }
 
+    # 📈 Multiplicadores por nivel
     level_multipliers = {
         "junior": 1.0,
         "mid": 1.5,
         "senior": 2.2
     }
 
-    # fallback seguro
+    # 🔒 fallback seguro
     base = base_salaries.get(job, 1500)
     multiplier = level_multipliers.get(level, 1.0)
 

@@ -11,56 +11,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 💼 salarios base reales (USD global estimado)
-BASE_SALARIES = {
+# 💼 USD mensuales (rangos globales reales aproximados)
+BASE = {
     "dev": 5500,
-    "developer": 5500,
     "software engineer": 6500,
     "designer": 3500,
     "ux": 4200,
-    "vet": 5000,
-    "veterinarian": 5000,
-    "data analyst": 4500,
+    "vet": 4500,
+    "veterinarian": 4500,
+    "data analyst": 4000,
     "marketing": 3800
 }
 
-# 📊 niveles reales de mercado
-LEVELS = {
+LEVEL = {
     "junior": 0.6,
     "mid": 1.0,
-    "senior": 1.8
-}
-
-# 🌍 monedas reales simplificadas
-CURRENCY = {
-    "US": 1,
-    "CL": 950,
-    "CA": 1.35,
-    "MX": 17,
-    "UK": 0.79,
-    "EU": 0.92
+    "senior": 1.7
 }
 
 @app.get("/rate")
-def get_rate(job: str = "dev", level: str = "junior", country: str = "US"):
+def rate(job: str = "dev", level: str = "junior", country: str = "US"):
 
     job = job.lower().strip()
     level = level.lower().strip()
-    country = country.upper().strip()
 
-    base = BASE_SALARIES.get(job, 4500)
-    mult = LEVELS.get(level, 1.0)
-    currency = CURRENCY.get(country, 1)
-
-    # 💰 USD realista
-    min_usd = base * mult
-    max_usd = base * mult * 1.25
+    base = BASE.get(job, 4000)
+    mult = LEVEL.get(level, 1.0)
 
     return {
         "job": job,
         "level": level,
-        "country": country,
-        "currency": currency,
-        "min_usd": round(min_usd),
-        "max_usd": round(max_usd)
+        "country": country.upper(),
+        "min_usd": round(base * mult),
+        "max_usd": round(base * mult * 1.25)
     }

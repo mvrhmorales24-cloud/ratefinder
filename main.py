@@ -8,7 +8,6 @@ def get_rate(job: str = "dev", level: str = "junior", country: str = "CL"):
     job = job.lower().strip()
     level = level.lower().strip()
 
-    # 💰 base salaries (simplificado pero estable)
     base_salaries = {
         "dev": 2500,
         "developer": 2500,
@@ -18,13 +17,13 @@ def get_rate(job: str = "dev", level: str = "junior", country: str = "CL"):
         "veterinarian": 2200
     }
 
-    # 📊 levels (FIX DEFINITIVO mid)
     level_multipliers = {
         "junior": 1.0,
         "mid": 1.5,
         "senior": 2.2
     }
 
+    # fallback seguro
     base = base_salaries.get(job, 1500)
     multiplier = level_multipliers.get(level, 1.0)
 

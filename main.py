@@ -11,7 +11,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 💼 base global USD (referencia internacional)
+# 💼 salarios base globales (USD/mes, rangos reales tech global)
 BASE = {
     "dev": 5500,
     "software engineer": 6500,
@@ -20,47 +20,53 @@ BASE = {
     "vet": 4500,
     "veterinarian": 4500,
     "data analyst": 4000,
-    "marketing": 3800
+    "marketing": 3800,
+    "product manager": 7000
 }
 
-# 📊 nivel
+# 📊 experiencia laboral estándar global
 LEVEL = {
     "junior": 0.6,
     "mid": 1.0,
     "senior": 1.7
 }
 
-# 🌍 AJUSTE REAL POR PAÍS (multiplicador de mercado)
-# basado en poder adquisitivo + salarios tech promedio
-COUNTRY_FACTOR = {
-    "US": 1.0,
-    "CA": 0.85,
-    "UK": 0.75,
-    "EU": 0.7,
-    "CL": 0.25,
-    "MX": 0.22,
-    "AR": 0.18
+# 🌍 factor país (PPP simplificado realista basado en mercado laboral)
+COUNTRY = {
+    "US": 1.00,
+    "CA": 0.86,
+    "UK": 0.78,
+    "DE": 0.72,
+    "FR": 0.70,
+    "ES": 0.65,
+    "EU": 0.72,
+    "CL": 0.28,
+    "MX": 0.25,
+    "AR": 0.20,
+    "BR": 0.30,
+    "CO": 0.24,
+    "PE": 0.23
 }
 
 @app.get("/rate")
-def rate(job: str = "dev", level: str = "junior", country: str = "US"):
+def rate(job: str, level: str, country: str):
 
     job = job.lower().strip()
     level = level.lower().strip()
     country = country.upper().strip()
 
     base = BASE.get(job, 4000)
-    mult = LEVEL.get(level, 1.0)
-    country_mult = COUNTRY_FACTOR.get(country, 0.5)
+    lvl = LEVEL.get(level, 1.0)
+    ctry = COUNTRY.get(country, 0.5)
 
-    # 💡 fórmula realista de mercado
-    min_salary = base * mult * country_mult
-    max_salary = base * mult * 1.25 * country_mult
+    min_salary = base * lvl * ctry
+    max_salary = base * lvl * 1.25 * ctry
 
     return {
         "job": job,
         "level": level,
         "country": country,
+        "currency": "USD",
         "min": round(min_salary),
         "max": round(max_salary)
     }

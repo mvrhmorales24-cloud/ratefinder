@@ -3,12 +3,12 @@
 app = FastAPI()
 
 @app.get("/rate")
-def get_rate(job: str, level: str, country: str):
+def get_rate(job: str = "dev", level: str = "junior", country: str = "CL"):
 
-    job = job.lower()
-    level = level.lower()
+    job = job.lower().strip()
+    level = level.lower().strip()
 
-    # 💰 base salaries (ejemplo simple pero consistente)
+    # 💰 base salaries (simplificado pero estable)
     base_salaries = {
         "dev": 2500,
         "developer": 2500,
@@ -18,27 +18,23 @@ def get_rate(job: str, level: str, country: str):
         "veterinarian": 2200
     }
 
-    base = base_salaries.get(job, 1500)
-
-    # 📊 level multiplier (FIX MID)
-    multipliers = {
+    # 📊 levels (FIX DEFINITIVO mid)
+    level_multipliers = {
         "junior": 1.0,
         "mid": 1.5,
         "senior": 2.2
     }
 
-    multiplier = multipliers.get(level, 1.0)
+    base = base_salaries.get(job, 1500)
+    multiplier = level_multipliers.get(level, 1.0)
 
-    min_salary = base * multiplier
-    max_salary = base * multiplier * 1.3
-
-    # 🌍 safe fallback country formatting
-    country = country.upper() if country else "UNKNOWN"
+    min_salary = int(base * multiplier)
+    max_salary = int(base * multiplier * 1.3)
 
     return {
         "job": job,
         "level": level,
-        "country": country,
-        "min": int(min_salary),
-        "max": int(max_salary)
+        "country": country.upper(),
+        "min": min_salary,
+        "max": max_salary
     }

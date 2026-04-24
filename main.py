@@ -3,9 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# -----------------------------
-# CORS (frontend Netlify)
-# -----------------------------
+# CORS para Netlify
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,74 +13,66 @@ app.add_middleware(
 )
 
 # -----------------------------
-# BASE DE DATOS SIMPLIFICADA
+# MONEDAS
+# -----------------------------
+CURRENCY = {
+    "CL": "CLP",
+    "US": "USD",
+    "CA": "CAD",
+    "UK": "GBP"
+}
+
+# -----------------------------
+# SALARIOS REALISTAS (BASE)
 # -----------------------------
 SALARIES = {
     "CL": {
-        "design": {
-            "junior": (800000, 1200000),
-            "mid": (1200000, 1800000),
-            "senior": (1800000, 2500000),
-        },
-        "developer": {
-            "junior": (1000000, 1500000),
-            "mid": (1500000, 2200000),
-            "senior": (2200000, 3500000),
-        },
-        "vet": {
-            "junior": (900000, 1300000),
-            "senior": (1500000, 2200000),
-        }
+        "developer": {"junior": (1000000, 1500000), "mid": (1500000, 2500000), "senior": (2500000, 4000000)},
+        "design": {"junior": (800000, 1200000), "senior": (2000000, 3000000)},
+        "vet": {"junior": (900000, 1400000), "senior": (2000000, 3500000)},
     },
     "US": {
-        "design": {
-            "junior": (3000, 4500),
-            "mid": (4500, 7000),
-            "senior": (7000, 12000),
-        },
-        "developer": {
-            "junior": (4000, 6000),
-            "mid": (6000, 9000),
-            "senior": (9000, 14000),
-        },
-        "vet": {
-            "junior": (3500, 5000),
-            "senior": (6000, 9000),
-        }
+        "developer": {"junior": (45000, 70000), "mid": (70000, 110000), "senior": (120000, 180000)},
+        "design": {"junior": (40000, 60000), "senior": (100000, 150000)},
+        "vet": {"junior": (60000, 85000), "senior": (90000, 140000)},
+    },
+    "CA": {
+        "developer": {"junior": (50000, 75000), "mid": (75000, 110000), "senior": (110000, 160000)},
+        "design": {"junior": (45000, 65000), "senior": (90000, 130000)},
+        "vet": {"junior": (65000, 90000), "senior": (100000, 150000)},
+    },
+    "UK": {
+        "developer": {"junior": (30000, 45000), "mid": (45000, 70000), "senior": (80000, 120000)},
+        "design": {"junior": (28000, 40000), "senior": (70000, 110000)},
+        "vet": {"junior": (35000, 50000), "senior": (70000, 100000)},
     }
 }
 
 # -----------------------------
-# NORMALIZACIÓN INTELIGENTE
+# NORMALIZACIÓN
 # -----------------------------
 def normalize_job(job: str):
     job = job.lower().strip()
-
     if job in ["dev", "developer", "software engineer", "programmer"]:
         return "developer"
     if job in ["design", "designer", "ux", "ui"]:
         return "design"
     if job in ["vet", "veterinarian", "veterinary"]:
         return "vet"
-
     return job
-
 
 def normalize_level(level: str):
     level = level.lower().strip()
-
     if level in ["jr", "junior", "entry"]:
         return "junior"
     if level in ["mid", "intermediate"]:
         return "mid"
     if level in ["sr", "senior", "lead"]:
         return "senior"
-
     return level
 
-
 # -----------------------------
-# ENDPOINT PRINCIPAL
+# ENDPOINT
 # -----------------------------
 @app.get("/rate")
 def get_rate(job: str, level: str, country: str):
@@ -98,6 +88,7 @@ def get_rate(job: str, level: str, country: str):
             "job": job,
             "level": level,
             "country": country,
+            "currency": CURRENCY.get(country, country),
             "min": min_sal,
             "max": max_sal
         }
@@ -107,7 +98,8 @@ def get_rate(job: str, level: str, country: str):
             "job": job,
             "level": level,
             "country": country,
-            "min": 1000,
-            "max": 2000,
-            "note": "No exact match, showing fallback estimate"
+            "currency": CURRENCY.get(country, country),
+            "min": 0,
+            "max": 0,
+            "note": "No data available"
         }

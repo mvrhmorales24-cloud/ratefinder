@@ -3,7 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# Permitir frontend (Netlify)
+# -----------------------------
+# CORS (frontend Netlify)
+# -----------------------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -12,6 +14,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# -----------------------------
+# BASE DE DATOS SIMPLIFICADA
+# -----------------------------
 SALARIES = {
     "CL": {
         "design": {
@@ -47,22 +52,62 @@ SALARIES = {
     }
 }
 
+# -----------------------------
+# NORMALIZACIÓN INTELIGENTE
+# -----------------------------
+def normalize_job(job: str):
+    job = job.lower().strip()
+
+    if job in ["dev", "developer", "software engineer", "programmer"]:
+        return "developer"
+    if job in ["design", "designer", "ux", "ui"]:
+        return "design"
+    if job in ["vet", "veterinarian", "veterinary"]:
+        return "vet"
+
+    return job
+
+
+def normalize_level(level: str):
+    level = level.lower().strip()
+
+    if level in ["jr", "junior", "entry"]:
+        return "junior"
+    if level in ["mid", "intermediate"]:
+        return "mid"
+    if level in ["sr", "senior", "lead"]:
+        return "senior"
+
+    return level
+
+
+# -----------------------------
+# ENDPOINT PRINCIPAL
+# -----------------------------
 @app.get("/rate")
 def get_rate(job: str, level: str, country: str):
 
-    job = job.lower()
-    level = level.lower()
-    country = country.upper()
+    job = normalize_job(job)
+    level = normalize_level(level)
+    country = country.upper().strip()
 
     try:
         min_sal, max_sal = SALARIES[country][job][level]
-    except KeyError:
-        min_sal, max_sal = (1000, 2000)
 
-    return {
-        "job": job,
-        "level": level,
-        "country": country,
-        "min": min_sal,
-        "max": max_sal
-    }
+        return {
+            "job": job,
+            "level": level,
+            "country": country,
+            "min": min_sal,
+            "max": max_sal
+        }
+
+    except KeyError:
+        return {
+            "job": job,
+            "level": level,
+            "country": country,
+            "min": 1000,
+            "max": 2000,
+            "note": "No exact match, showing fallback estimate"
+        }
